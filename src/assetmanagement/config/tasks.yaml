@@ -2,15 +2,49 @@ research_task:
   description: >
     Gather and analyze the latest news and market sentinment surrounding 
     {company}'s stock. Provide a summary of the news and any notable shifts in sentiment.
+
+    Follow these rules:
+    - Only include articles that are especially relevant to {company}. Do not include any news that are not directly related to {company}. 
+    - Do not include sources that are not a news article. If the content of the page includes a list of articles or looks like the front page of a website, do not include it in the list!
+    - Summarize the news in a few sentences. Make the summary as long as necessary to include all the relevant information, but not too long for a newsletter.
+    - When using the Stock News tool, parameter MUST be one word of {company}'s ticker name.(for example, ABNB, ONL, DIS, GRMN, BABA)
+    - When using the ScrapeWebsiteTool, your search query should be concise (for example, "latest news on {company}").
+
   expected_output: >
     Your final answer MUST be a detailed summary of the news and market 
     sentiment surrounding the stock.
   agent: researcher
+  
+macro_strategist_task:
+  description: >
+    Analyze the USA economic environment, market trends, and global events 
+    to provide insights on how they may impact the stock market and {company}'s stock in particular.
+    • Develop sophisticated macro-economic frameworks to analyze global economic trends, monetary policies, and their impacts on financial markets
+    • Generate high-conviction trade ideas and strategic investment recommendations across asset classes
+    • Provide real-time analysis of market-moving economic data releases and central bank decisions
+    • Present investment themes and market views to institutional clients and internal investment committees
+    • Collaborate with cross-asset strategists to formulate cohesive investment strategies
+    • Author flagship research publications and thematic reports on global macro trends
+    Use the Macro Economic Analysis tool to analyze the USA economic environment, market trends, and global events that may impact the stock market and {company}'s stock in particular.
+    - You can use the tool as many times as you want to get enough macroeconomic data and trends.
+    - Use important series_id to get the data which is relevant to the macroeconomic analysis.
+    for example, - GDPC1, UNRATE, GS10, T10Y2Y, M2, UMCSENT, CPIAUCNS, CPILFESL, PCEPI, PPIACO, RSXFS, INDPRO, HOUST, NHSLTOT, STLFSI3, 
+  
+  expected_output: >
+    Your final answer MUST be a detailed report on the USA economic environment, market trends, 
+    and global events that may impact the stock market and {company}'s stock in particular.
+  agent: macro_strategist
 
 technical_analysis_task:
   description: >
     Conduct a technical analysis of the {company} stock price movements 
     and identify key support and resistance levels chart patterns.
+    When using the Stock Price tool
+    - Use provided tool sequentially to analyze the stock price movements over different time frames.
+    - parameter MUST be one word of {company}'s ticker name.(for example, ABNB, ONL, DIS, GRMN, BABA)
+    - Stock Price - 1 Month tool to analyze the {company}'s stock price movements over the last month.
+    - Stock Price - 1 Year tool to analyze the {company}'s stock price movements over the last year.
+
   expected_output: >
     Your final answer MUST be a report with potential entry points, 
     price targets and any other relevant information.
@@ -18,8 +52,13 @@ technical_analysis_task:
 
 financial_analysis_task:
   description: >
-    Analyze the {company}'s financial statements, balance sheet, insider trading data 
+    Analyze the {company}'s financial statements, balance sheet, insider transactions data 
     and other metrics to evaluate {company}'s financial health and performance.
+    You MUST use all the following three tools:
+    - When using Income Statement tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
+    - When using Balance Sheet tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
+    - When using Insider Transactions tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
+
   expected_output: >
     Your final answer MUST be a report with an overview of {company}'s revenue, earnings,
     cash flow, and other key financial metrics.
@@ -32,5 +71,15 @@ investment_recommendation_task:
   expected_output: >
     Your final answer MUST be a detailed recommendation to BUY, SELL or HOLD the stock.
     Provide a clear rationale for your recommendation.
-  context: [research_task,technical_analysis_task,financial_analysis_task]
+    The final answer MUST use markdown format for the best readability.
+  context: [research_task,technical_analysis_task,financial_analysis_task, macro_strategist_task]
   agent: hedge_fund_manager
+
+translate_task:
+  description: >
+    Translate final report of hedge fund manager into korean language.
+  expected_output: >
+    Your final answer MUST be a translated version of the hedge fund manager's report in Korean.
+    The final answer MUST use markdown format for the best readability.
+  context: [investment_recommendation_task]
+  agent: translator

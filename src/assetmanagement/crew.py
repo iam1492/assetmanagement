@@ -1,8 +1,12 @@
-
-from assetmanagement.tools.custom_tool import stock_news, stock_price, income_stmt, balance_sheet, insider_transactions
+from assetmanagement.tools.custom_tool import stock_news, stock_price_1m, stock_price_1y, income_stmt, balance_sheet, insider_transactions, macro_economic_data
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import ScrapeWebsiteTool
+from crewai.agents.parser import AgentAction, AgentFinish
+import streamlit as st
+from typing import Union, List, Tuple, Dict
+import os
+
 
 # If you want to run a snippet of code before or after the crew starts, 
 # you can use the @before_kickoff and @after_kickoff decorators
@@ -11,8 +15,10 @@ from crewai_tools import ScrapeWebsiteTool
 LLM.set_verbose=True
 scrape_tool = ScrapeWebsiteTool()
 
-ollama = LLM(model="ollama/llama3", base_url="http://localhost:11434")
-#anthropic = LLM(model="anthropic/claude-3-5-sonnet-20240620",api_key=os.environ["ANTHROPIC_API_KEY"])
+#sLLM = LLM(model="ollama/gemma2:9b", base_url="http://localhost:11434")
+#sLLM = LLM(model="ollama/llama3:latest", base_url="http://localhost:11434")
+#sLLM = LLM(model="anthropic/claude-3-5-sonnet-20240620",api_key=os.environ["ANTHROPIC_API_KEY"])
+sLLM = LLM(model="gpt-4o",api_key=os.environ["OPENAI_API_KEY"])
 
 @CrewBase
 class Assetmanagement():
@@ -23,7 +29,36 @@ class Assetmanagement():
 	# Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
 	agents_config = 'config/agents.yaml'
 	tasks_config = 'config/tasks.yaml'
-
+ 
+	def step_callback(
+        self,
+        agent_output: Union[str, List[Tuple[Dict, str]], AgentFinish],
+        agent_name,
+        *args,
+    ):
+		st.write("")
+		
+		with st.chat_message("AI"):
+			if isinstance(agent_output, AgentAction):
+				st.write(f"Agent Name: {agent_name}")
+				if agent_output.tool:
+					st.write(f"Tool Used: {agent_output.tool}")
+					st.write(f"Tool input: {agent_output.tool_input}")
+				if agent_output.text:
+					st.write(f"Message: {agent_output.text}")
+				if agent_output.result:
+					st.write(f"Result: {agent_output.result}")
+    
+			elif isinstance(agent_output, AgentFinish):
+				st.write(f"Agent Name: {agent_name}")
+				if agent_output.thought:
+					st.write(f"I finished my task:\n{agent_output.thought}")
+				if agent_output.output:
+					st.write(f"I finished my task:\n{agent_output.output}")
+			else:
+				st.write(type(agent_output))
+				st.write(agent_output)
+     
 	# If you would like to add tools to your agents, you can learn more about it here:
 	# https://docs.crewai.com/concepts/agents#agent-tools
 	@agent
@@ -34,7 +69,19 @@ class Assetmanagement():
 				scrape_tool,
 				stock_news
 			],
-			llm=ollama,
+			llm=sLLM,
+			step_callback=lambda step: self.step_callback(step, "Researcher")
+		)
+  
+	@agent
+	def	macro_strategist(self) -> Agent:
+		return Agent(
+			config=self.agents_config['macro_strategist'],
+			tools=[
+				macro_economic_data,
+			],
+			llm=sLLM,
+			step_callback=lambda step: self.step_callback(step, "Macro Strategist")
 		)
 
 	@agent
@@ -42,9 +89,11 @@ class Assetmanagement():
 		return Agent(
 			config=self.agents_config['technical_analyst'],
 			tools=[
-				stock_price
+				stock_price_1m,
+				stock_price_1y,
 			],
-			llm=ollama
+			llm=sLLM,
+   			step_callback=lambda step: self.step_callback(step, "Technical Analyst")
 		)
 
 	@agent
@@ -54,9 +103,10 @@ class Assetmanagement():
 			tools=[
 				income_stmt,
 				balance_sheet,
-				insider_transactions
+				insider_transactions,
 			],
-			llm=ollama
+			llm=sLLM,
+			step_callback=lambda step: self.step_callback(step, "Financial Analyst")
 		)
 	
 	@agent
@@ -64,7 +114,15 @@ class Assetmanagement():
 		return Agent(
 			config=self.agents_config['hedge_fund_manager'],
 			verbose=True,
-			llm=ollama
+			llm=sLLM,
+			step_callback=lambda step: self.step_callback(step, "Hedge Fund Manager")
+		)
+	@agent
+	def translator(self) -> Agent:
+		return Agent(
+			config=self.agents_config['translator'],
+			llm=sLLM,
+			step_callback=lambda step: self.step_callback(step, "Translator")
 		)
   
 	# To learn more about structured task outputs, 
@@ -74,6 +132,13 @@ class Assetmanagement():
 	def research_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['research_task'],
+		)
+  
+	@task
+	def macro_strategist_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['macro_strategist_task'],
+			output_file='macro_report.md',
 		)
 
 	@task
@@ -95,6 +160,13 @@ class Assetmanagement():
 		return Task(
 			config=self.tasks_config['investment_recommendation_task'],
 			output_file='investment_recommendation.md',
+		)
+	
+	@task
+	def translate_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['translate_task'],
+			output_file='investment_recommendation_kr.md',
 		)
 
 	@crew
