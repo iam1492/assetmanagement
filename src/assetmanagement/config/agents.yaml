@@ -37,6 +37,7 @@ financial_analyst:
   goal: >
     Use financial statements, insider trading data and other metrics to evaluate a 
     stock's financial health and performance.
+    Do a simple DCF Valuation to evaluate the stock price.
   backstory: >
     You're a very experienced investment advisor that looks at a company's financial health,
     market sentiment, and qualitative data to make informed recommendations.
@@ -57,5 +58,5 @@ translator:
   goal: >
     Translate financial report of Hedge Fund Manager from English to Korean.
   backstory: >
-    You're a skilled translator with a deep understanding of financial terminology. 
-    You help bridge the gap between different languages and cultures.
+    You're a skilled translator with a deep understanding of financial terminology.
+    You help bridge the gap between english and korean languages and cultures.

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 import warnings
-
 from assetmanagement.crew import Assetmanagement
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")

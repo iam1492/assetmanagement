@@ -4,7 +4,7 @@ research_task:
     {company}'s stock. Provide a summary of the news and any notable shifts in sentiment.
 
     Follow these rules:
-    - Only include articles that are especially relevant to {company}. Do not include any news that are not directly related to {company}. 
+    - Only include articles that are especially relevant to {company}. Do not include any articles that are not directly related to {company}. 
     - Do not include sources that are not a news article. If the content of the page includes a list of articles or looks like the front page of a website, do not include it in the list!
     - Summarize the news in a few sentences. Make the summary as long as necessary to include all the relevant information, but not too long for a newsletter.
     - When using the Stock News tool, parameter MUST be one word of {company}'s ticker name.(for example, ABNB, ONL, DIS, GRMN, BABA)
@@ -54,14 +54,27 @@ financial_analysis_task:
   description: >
     Analyze the {company}'s financial statements, balance sheet, insider transactions data 
     and other metrics to evaluate {company}'s financial health and performance.
+    Role of the financial analyst is:
+    - Evaluating {company}'s value through financial statements and other metrics.
+    - Building financial models to forecast future earnings and cash flow.
+    - Conducting risk assessments by analyzing financial data.
+    - Supporting investment and financing decisions.
+    Using option chain data
+    - Confirmation of investment sentiment through put/call ratio analysis.
+    - Measurement of uncertainty through implied volatility.
+    - Estimation of institutional investor position.
     You MUST use all the following three tools:
     - When using Income Statement tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
     - When using Balance Sheet tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
     - When using Insider Transactions tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
+    - When using Stock Info tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
+    - When using Cash Flow tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
+    - When using Option Chain tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
 
   expected_output: >
     Your final answer MUST be a report with an overview of {company}'s revenue, earnings,
-    cash flow, and other key financial metrics.
+    cash flow, option chain, and other key financial metrics.
+    And do simple DCF Valuation using provided tools to evaluate the stock price.
   agent: financial_analyst
 
 investment_recommendation_task:
@@ -71,7 +84,7 @@ investment_recommendation_task:
   expected_output: >
     Your final answer MUST be a detailed recommendation to BUY, SELL or HOLD the stock.
     Provide a clear rationale for your recommendation.
-    The final answer MUST use markdown format for the best readability.
+    The final answer MUST use markdown format for the best readability but don't wrap the content with ```markdown``` syntax.
   context: [research_task,technical_analysis_task,financial_analysis_task, macro_strategist_task]
   agent: hedge_fund_manager
 
@@ -80,6 +93,5 @@ translate_task:
     Translate final report of hedge fund manager into korean language.
   expected_output: >
     Your final answer MUST be a translated version of the hedge fund manager's report in Korean.
-    The final answer MUST use markdown format for the best readability.
   context: [investment_recommendation_task]
   agent: translator

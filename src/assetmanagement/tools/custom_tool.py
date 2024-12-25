@@ -70,6 +70,25 @@ def stock_price_1y(ticker: str):
     ticker = yf.Ticker(ticker)
     return ticker.history(period="1y")
 
+@tool("Stock Info")
+def stock_info(ticker: str):
+    """
+    Useful to get stock infomation.
+    (e.g. market cap, beta, 52-week high, 52-week low, etc.)
+    The input should be a ticker str and dont use dic, for example AAPL, NET.
+    """
+    ticker = yf.Ticker(ticker)
+    return ticker.info
+
+@tool("Cash Flow")
+def cash_flow(ticker: str):
+    """
+    Useful to get the cash flow of a company.
+    The input to this tool should be a ticker str and dont use dic, for example AAPL, NET. 
+    """
+    ticker = yf.Ticker(ticker)
+    return ticker.cash_flow
+
 @tool("Income Statement")
 def income_stmt(ticker: str):
     """
@@ -96,3 +115,21 @@ def insider_transactions(ticker: str):
     """
     ticker = yf.Ticker(ticker)
     return ticker.insider_transactions
+
+@tool("Option Chain")
+def option_chain(ticker: str):
+    """
+    Useful to get the option chain of a stock.
+    The input to this tool should be a ticker str and dont use dic, for example AAPL, NET. 
+    The output of this tool is a tuple of calls and puts.
+    """
+    ticker = yf.Ticker(ticker)
+    expirations = ticker.options
+    if expirations:
+        first_expiration = expirations[0]
+        chain = ticker.option_chain(first_expiration)
+        calls = chain.calls
+        puts = chain.puts
+        return calls, puts
+    else:
+        return None, None
