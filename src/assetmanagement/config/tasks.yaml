@@ -1,20 +1,13 @@
 research_task:
   description: >
     Gather and analyze the latest news and market sentinment surrounding 
-    {company}'s stock. Provide a summary of the news and any notable shifts in sentiment.
-
-    Follow these rules:
-    - Only include articles that are especially relevant to {company}. Do not include any articles that are not directly related to {company}. 
-    - Do not include sources that are not a news article. If the content of the page includes a list of articles or looks like the front page of a website, do not include it in the list!
-    - Summarize the news in a few sentences. Make the summary as long as necessary to include all the relevant information, but not too long for a newsletter.
-    - When using the Stock News tool, parameter MUST be one word of {company}'s ticker name.(for example, ABNB, ONL, DIS, GRMN, BABA)
-    - When using the ScrapeWebsiteTool, your search query should be concise (for example, "latest news on {company}").
-
+    {company}'s stock. Use provided tools to get the latest news and market sentiment.
+    Use ScrapeWebsiteTool and SerperDevTool to get the latest news and market sentiment.
   expected_output: >
     Your final answer MUST be a detailed summary of the news and market 
     sentiment surrounding the stock.
   agent: researcher
-  
+
 macro_strategist_task:
   description: >
     Analyze the USA economic environment, market trends, and global events 

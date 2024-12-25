@@ -9,9 +9,10 @@ from assetmanagement.crew import Assetmanagement
 from crewai.crew import CrewOutput
 import assetmanagement.emoji as emoji
 import smtplib
-from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+import re
 
 class StockReportGenUI:
     
@@ -25,16 +26,31 @@ class StockReportGenUI:
         if st.session_state.generating:
             st.session_state.final_report = self.start_analysing(st.session_state.company)
         if st.session_state.final_report and st.session_state.final_report != "":
-            if isinstance(st.session_state.final_report, CrewOutput):
-                self.send_email(st.session_state.final_report.raw, st.session_state.company)
             st.session_state.generating = False
+            if isinstance(st.session_state.final_report, CrewOutput):
+                try:
+                    self.send_email(st.session_state.final_report.raw, st.session_state.company, st.session_state.email)
+                    st.session_state.final_report = ""
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
+                    st.session_state.final_report = ""
+
+    def is_valid_email(self, email: str):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        return re.match(pattern, email) is not None
 
     def sidebar(self):
         with st.sidebar:
             st.markdown("## Menu")
-            company = st.text_input("Enter name of company", key='company', placeholder="Apple, Adobe, etc")
-            if st.button("WORK FOR ME!!!"):
-                print("Button Clicked")
+            st.text_input("Enter name of company", key='company', placeholder="Apple, Adobe, etc")
+            email = st.text_input("Enter email for the final Report", key='email', placeholder="abc@def.com")
+
+            if (not email):
+                disabled = False
+            else:
+                disabled = not self.is_valid_email(email)
+                
+            if st.button("Start Analysis", disabled=disabled):
                 st.session_state.generating = True
     
     def render(self):
@@ -66,16 +82,19 @@ class StockReportGenUI:
         self.sidebar();
         self.report_generation();
 
-    def send_email(self, markdown_text: str, company: str):
+    def send_email(self, markdown_text: str, company: str, email: str):
         load_dotenv()
         
+        if email and email != "":
+            receiver = email
+        else:
+            receiver = os.getenv('EMAIL_RECEIVER')
+
+        sender = os.getenv('GMAIL_SENDER')
         smtp_server = os.getenv('SMTP_SERVER')
         smtp = smtplib.SMTP(smtp_server, 587)
         smtp.starttls()
         smtp.login(os.getenv('GMAIL_SENDER'), os.getenv('GMAIL_PASSWORD'))
-        
-        sender = os.getenv('GMAIL_SENDER')
-        receiver = os.getenv('EMAIL_RECEIVER')
         
         multipart_msg = MIMEMultipart("alternative")
         multipart_msg["Subject"] = f"{company} Stock Analysis Report"
@@ -88,6 +107,15 @@ class StockReportGenUI:
         multipart_msg.attach(part1)
         multipart_msg.attach(part2)
         
+        script_dir = os.path.dirname(__file__)
+        financial_report_path = os.path.join(script_dir, "reports/financial_report.md")
+        with open(financial_report_path, "r") as f:
+            multipart_msg.attach(MIMEApplication(f.read(), Name="financial_report.md"))
+
+        technical_report_path = os.path.join(script_dir, "reports/technical_report.md")
+        with open(technical_report_path, "r") as f:
+            multipart_msg.attach(MIMEApplication(f.read(), Name="technical_report.md"))
+
         smtp.sendmail(sender, receiver, multipart_msg.as_string())
         smtp.quit()
     

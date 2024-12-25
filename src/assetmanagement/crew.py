@@ -1,7 +1,7 @@
 from assetmanagement.tools.custom_tool import stock_news, stock_price_1m, stock_price_1y, income_stmt, balance_sheet, insider_transactions, macro_economic_data, stock_info, cash_flow, option_chain
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
-from crewai_tools import ScrapeWebsiteTool
+from crewai_tools import ScrapeWebsiteTool, SerperDevTool
 from crewai.agents.parser import AgentAction, AgentFinish
 import streamlit as st
 from typing import Union, List, Tuple, Dict
@@ -14,6 +14,7 @@ import assetmanagement.emoji as emoji
 
 LLM.set_verbose=True
 scrape_tool = ScrapeWebsiteTool()
+serperdev_tool = SerperDevTool()
 
 #sLLM = LLM(model="ollama/gemma2:9b", base_url="http://localhost:11434")
 #sLLM = LLM(model="ollama/llama3:latest", base_url="http://localhost:11434")
@@ -67,8 +68,10 @@ class Assetmanagement():
 			config=self.agents_config['researcher'],
 			tools=[
 				scrape_tool,
+				serperdev_tool,
 				stock_news
 			],
+   			verbose=True,
 			llm=sLLM,
 			step_callback=lambda step: self.step_callback(step, "Researcher")
 		)
@@ -120,6 +123,7 @@ class Assetmanagement():
 			llm=sLLM,
 			step_callback=lambda step: self.step_callback(step, "Hedge Fund Manager")
 		)
+
 	@agent
 	def translator(self) -> Agent:
 		return Agent(
