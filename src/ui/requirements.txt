@@ -2,7 +2,7 @@ markdown
 streamlit
 pandas
 numpy
-crewai
+crewai==0.70.1
 crewai-tools
 streamlit-authenticator
 yfinance
