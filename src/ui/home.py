@@ -14,6 +14,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import re
+import pickle
+from pathlib import Path
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
 class StockReportGenUI:
     
@@ -51,38 +56,65 @@ class StockReportGenUI:
                 disabled = False
             else:
                 disabled = not self.is_valid_email(email)
-                
+            
             if st.button("Start Analysis", disabled=disabled):
                 st.session_state.generating = True
+
+    def authenticate(self):
+        
+        dir = os.path.dirname(__file__)
+        config_path = os.path.join(dir, "config/authentication.yaml")
+    
+        with open(config_path) as file:
+            config = yaml.load(file, Loader=SafeLoader)
+        print(config)
+        authenticator = stauth.Authenticate(
+            config['credentials'],
+            config['cookie']['name'],
+            config['cookie']['key'],
+            config['cookie']['expiry_days']
+        )
+        authenticator.login(location="main")
+        
+        if st.session_state['authentication_status']:
+            authenticator.logout(location="sidebar")
+            return True
+        elif st.session_state['authentication_status'] is False:
+            st.error('Username/password is incorrect')
+            return False
+        elif st.session_state['authentication_status'] is None:
+            st.warning('Please enter your username and password')
+            return False
     
     def render(self):
         st.set_page_config(page_title="Ramus", page_icon="👋")
         
-        if "company" not in st.session_state:
-            st.session_state.company = ""
+        if self.authenticate():
+            if "company" not in st.session_state:
+                st.session_state.company = ""
+                
+            if "final_report" not in st.session_state:
+                st.session_state.final_report = ""
+                
+            if "generating" not in st.session_state:
+                st.session_state.generating = ""
+            st.write("# Welcome to Ramus Corp")
+            st.markdown(
+                f"""
+                ## Members
+                ### {emoji.RAMUS} CEO - Ramus Jung
+                ### {emoji.SUNNY} CSO - Sunny Park
+                * {emoji.SANTA} Research Head - Santa Claus
+                * {emoji.RUDOLF} Technical Analyst - Rudolf
+                * {emoji.SNOWMAN} Financial Analyst - Snowman
+                * {emoji.ELSA} Macro Analyst - Elsa
+                * {emoji.PENGSU} Translator - Pengsu
+                * {emoji.KEVIN} Hedge Fund Manager - Kevin
+                """
+            )
             
-        if "final_report" not in st.session_state:
-            st.session_state.final_report = ""
-            
-        if "generating" not in st.session_state:
-            st.session_state.generating = ""
-        st.write("# Welcome to Ramus Corp")
-        st.markdown(
-            f"""
-            ## Members
-            ### {emoji.RAMUS} CEO - Ramus Jung
-            ### {emoji.SUNNY} CSO - Sunny Park
-            * {emoji.SANTA} Research Head - Santa Claus
-            * {emoji.RUDOLF} Technical Analyst - Rudolf
-            * {emoji.SNOWMAN} Financial Analyst - Snowman
-            * {emoji.ELSA} Macro Analyst - Elsa
-            * {emoji.PENGSU} Translator - Pengsu
-            * {emoji.KEVIN} Hedge Fund Manager - Kevin
-            """
-        )
-        
-        self.sidebar();
-        self.report_generation();
+            self.sidebar();
+            self.report_generation();
 
     def send_email(self, markdown_text: str, company: str, email: str):
         load_dotenv()

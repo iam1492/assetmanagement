@@ -20,8 +20,8 @@ serperdev_tool = SerperDevTool()
 #sLLM = LLM(model="ollama/llama3:latest", base_url="http://localhost:11434")
 #sLLM = LLM(model="anthropic/claude-3-5-sonnet-20240620",api_key=os.environ["ANTHROPIC_API_KEY"])
 #sLLM = LLM(model="o1-preview",api_key=os.environ["OPENAI_API_KEY"])
-sLLM = LLM(model="gpt-4o",api_key=os.environ["OPENAI_API_KEY"])
-#sLLM = LLM(model="gemini/gemini-2.0-flash-exp", api_key=os.environ["GEMINI_API_KEY"])
+#sLLM = LLM(model="gpt-4o",api_key=os.environ["OPENAI_API_KEY"])
+sLLM = LLM(model="gemini/gemini-2.0-flash-exp", api_key=os.environ["GEMINI_API_KEY"])
 
 @CrewBase
 class Assetmanagement():
