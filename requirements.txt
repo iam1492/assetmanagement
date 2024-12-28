@@ -1,0 +1,7 @@
+streamlit
+pandas
+numpy
+markdown
+crewai
+crewai-tools
+streamlit-authenticator 
