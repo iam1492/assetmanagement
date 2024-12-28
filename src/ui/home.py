@@ -24,6 +24,14 @@ from pyaml_env import parse_config
 load_dotenv()
 
 class StockReportGenUI:
+    authenticator = None
+    config = None
+    
+    def __init__(self):
+        dir = os.path.dirname(__file__)
+        config_path = os.path.join(dir, "config/authentication.yaml")
+        self.config = parse_config(config_path)
+        self.authenticator = None
     
     def start_analysing(self, company):
         inputs = {
@@ -64,30 +72,23 @@ class StockReportGenUI:
                 st.session_state.generating = True
 
     def authenticate(self):
-        
-        dir = os.path.dirname(__file__)
-        config_path = os.path.join(dir, "config/authentication.yaml")
-    
-        config = parse_config(config_path)
-        
-        authenticator = stauth.Authenticate(
-            config['credentials'],
-            config['cookie']['name'],
-            config['cookie']['key'],
-            config['cookie']['expiry_days'],
-            auto_hash=False
-        )
-        
-        print(config['credentials'])
+        if self.authenticator == None:
+            self.authenticator = stauth.Authenticate(
+                self.config['credentials'],
+                self.config['cookie']['name'],
+                self.config['cookie']['key'],
+                self.config['cookie']['expiry_days'],
+                auto_hash=False
+            )
         
         if st.session_state['authentication_status']:
-            authenticator.logout(location="sidebar")
+            self.authenticator.logout(location="sidebar")
             return True
         elif st.session_state['authentication_status'] is False:
             st.error('Username/password is incorrect')
             return False
         elif st.session_state['authentication_status'] is None:
-            authenticator.login(location="main")
+            self.authenticator.login(location="main")
             st.warning('Please enter your username and password')
             return False
     
