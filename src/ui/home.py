@@ -78,6 +78,8 @@ class StockReportGenUI:
             auto_hash=False
         )
         
+        print(config['credentials'])
+        
         if st.session_state['authentication_status']:
             authenticator.logout(location="sidebar")
             return True
