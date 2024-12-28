@@ -19,8 +19,9 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import re
 import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
+from pyaml_env import parse_config
+
+load_dotenv()
 
 class StockReportGenUI:
     
@@ -67,8 +68,7 @@ class StockReportGenUI:
         dir = os.path.dirname(__file__)
         config_path = os.path.join(dir, "config/authentication.yaml")
     
-        with open(config_path) as file:
-            config = yaml.load(file, Loader=SafeLoader)
+        config = parse_config(config_path)
         
         authenticator = stauth.Authenticate(
             config['credentials'],
@@ -77,6 +77,7 @@ class StockReportGenUI:
             config['cookie']['expiry_days'],
             auto_hash=False
         )
+        
         authenticator.login(location="main")
         
         if st.session_state['authentication_status']:
@@ -120,8 +121,6 @@ class StockReportGenUI:
             self.report_generation();
 
     def send_email(self, markdown_text: str, company: str, email: str):
-        load_dotenv()
-        
         if email and email != "":
             receiver = email
         else:
