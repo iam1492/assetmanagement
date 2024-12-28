@@ -21,4 +21,4 @@ credentials:
       logged_in: False # Will be managed automatically
       password: !ENV ${SUNNY_PW}
       roles: # Optional
-      - admin
+      - viewer
