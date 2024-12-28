@@ -14,8 +14,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import re
-import pickle
-from pathlib import Path
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
