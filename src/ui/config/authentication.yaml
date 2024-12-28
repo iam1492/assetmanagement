@@ -5,20 +5,20 @@ cookie:
 credentials:
   usernames:
     ramus:
-      email: iam1492@gmail.com
+      email: !ENV ${RAMUS_EMAIL}
       failed_login_attempts: 0 # Will be managed automatically
       first_name: Ramus
       last_name: Jung
       logged_in: False # Will be managed automatically
-      password: $2b$12$A3AN4h1ZS.t61s2ARbD17Oxyl/trjwf1le4rkGYlSruNinBDfZCre
+      password: !ENV ${RAMUS_PW}
       roles: # Optional
       - admin
     sunny:
-      email: howtomeetme@gmail.com
+      email: !ENV ${SUNNY_EMAIL}
       failed_login_attempts: 0 # Will be managed automatically
       first_name: Sunny
       last_name: Park
       logged_in: False # Will be managed automatically
-      password: $2b$12$eXfx.dLkvHb8KgkkPtK8LOL3zOmKrG2QNKYR6Z8EVcmr7rISPKxN2
+      password: !ENV ${SUNNY_PW}
       roles: # Optional
       - admin

@@ -20,8 +20,6 @@ from email.mime.application import MIMEApplication
 import re
 import streamlit_authenticator as stauth
 from pyaml_env import parse_config
-import yaml
-from yaml.loader import SafeLoader
 
 load_dotenv()
 
@@ -70,8 +68,7 @@ class StockReportGenUI:
         dir = os.path.dirname(__file__)
         config_path = os.path.join(dir, "config/authentication.yaml")
     
-        with open(config_path) as file:
-            config = yaml.load(file, Loader=SafeLoader)
+        config = parse_config(config_path)
         
         authenticator = stauth.Authenticate(
             config['credentials'],
