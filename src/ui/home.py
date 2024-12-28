@@ -78,8 +78,6 @@ class StockReportGenUI:
             auto_hash=False
         )
         
-        authenticator.login(location="main")
-        
         if st.session_state['authentication_status']:
             authenticator.logout(location="sidebar")
             return True
@@ -87,6 +85,7 @@ class StockReportGenUI:
             st.error('Username/password is incorrect')
             return False
         elif st.session_state['authentication_status'] is None:
+            authenticator.login(location="main")
             st.warning('Please enter your username and password')
             return False
     
