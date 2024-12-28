@@ -1,7 +1,7 @@
 streamlit
 pandas
 numpy
-markdown
+Markdown
 crewai
 crewai-tools
-streamlit-authenticator 
+streamlit-authenticator
