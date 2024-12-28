@@ -22,4 +22,3 @@ crew_tasks_output.json
 .ruff_cache
 .venv
 reports/
-authentication.yaml

@@ -69,12 +69,13 @@ class StockReportGenUI:
     
         with open(config_path) as file:
             config = yaml.load(file, Loader=SafeLoader)
-        print(config)
+        
         authenticator = stauth.Authenticate(
             config['credentials'],
             config['cookie']['name'],
             config['cookie']['key'],
-            config['cookie']['expiry_days']
+            config['cookie']['expiry_days'],
+            auto_hash=False
         )
         authenticator.login(location="main")
         
