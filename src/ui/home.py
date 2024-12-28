@@ -3,6 +3,7 @@ import sys
 import pathlib
 import markdown
 import os
+import traceback
 from dotenv import load_dotenv
 sys.path.append(str(pathlib.Path(__file__).parent.parent))
 from assetmanagement.crew import Assetmanagement
@@ -32,6 +33,7 @@ class StockReportGenUI:
                     self.send_email(st.session_state.final_report.raw, st.session_state.company, st.session_state.email)
                     st.session_state.final_report = ""
                 except Exception as e:
+                    print(traceback.format_exc())
                     st.error(f"An error occurred: {e}")
                     st.session_state.final_report = ""
 
@@ -109,11 +111,11 @@ class StockReportGenUI:
         
         script_dir = os.path.dirname(__file__)
         financial_report_path = os.path.join(script_dir, "reports/financial_report.md")
-        with open(financial_report_path, "r") as f:
+        with open(financial_report_path, "r", encoding='utf-8') as f:
             multipart_msg.attach(MIMEApplication(f.read(), Name="financial_report.md"))
 
         technical_report_path = os.path.join(script_dir, "reports/technical_report.md")
-        with open(technical_report_path, "r") as f:
+        with open(technical_report_path, "r", encoding='utf-8') as f:
             multipart_msg.attach(MIMEApplication(f.read(), Name="technical_report.md"))
 
         smtp.sendmail(sender, receiver, multipart_msg.as_string())

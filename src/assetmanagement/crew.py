@@ -1,4 +1,4 @@
-from assetmanagement.tools.custom_tool import stock_news, stock_price_1m, stock_price_1y, income_stmt, balance_sheet, insider_transactions, macro_economic_data, stock_info, cash_flow, option_chain
+from assetmanagement.tools.custom_tool import *
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import ScrapeWebsiteTool, SerperDevTool
@@ -19,7 +19,9 @@ serperdev_tool = SerperDevTool()
 #sLLM = LLM(model="ollama/gemma2:9b", base_url="http://localhost:11434")
 #sLLM = LLM(model="ollama/llama3:latest", base_url="http://localhost:11434")
 #sLLM = LLM(model="anthropic/claude-3-5-sonnet-20240620",api_key=os.environ["ANTHROPIC_API_KEY"])
+#sLLM = LLM(model="o1-preview",api_key=os.environ["OPENAI_API_KEY"])
 sLLM = LLM(model="gpt-4o",api_key=os.environ["OPENAI_API_KEY"])
+#sLLM = LLM(model="gemini/gemini-2.0-flash-exp", api_key=os.environ["GEMINI_API_KEY"])
 
 @CrewBase
 class Assetmanagement():
@@ -77,6 +79,41 @@ class Assetmanagement():
 		)
   
 	@agent
+	def financial_analyst(self) -> Agent:
+		return Agent(
+			config=self.agents_config['financial_analyst'],
+			tools=[
+				stock_info,
+				income_stmt,
+				income_stmt_quarterly,
+				balance_sheet,
+				balance_sheet_quarterly,
+				cash_flow,
+    			cash_flow_quarterly,
+				insider_transactions,
+				option_chain,
+				quick_ratio_calculator,
+				gross_profit_margin_calculator,
+				operating_margin_calculator,
+				net_profit_margin_calculator,
+				return_on_assets_calculator,
+				return_on_equity_calculator,
+				return_on_invested_capital_calculator,
+				debt_to_equity_ratio_calculator,
+				debt_to_assets_ratio_calculator,
+				quick_ratio_calculator,
+				inventory_turnover_ratio_calculator,
+				receivables_turnover_ratio_calculator,
+				interest_coverage_ratio_calculator,
+				free_cash_flow_calculator,
+				earnings_growth_rate_calculator,
+				asset_turnover_calculator,
+			],
+			llm=sLLM,
+			step_callback=lambda step: self.step_callback(step, "Financial Analyst")
+		)
+  
+	@agent
 	def	macro_strategist(self) -> Agent:
 		return Agent(
 			config=self.agents_config['macro_strategist'],
@@ -97,22 +134,6 @@ class Assetmanagement():
 			],
 			llm=sLLM,
    			step_callback=lambda step: self.step_callback(step, "Technical Analyst")
-		)
-
-	@agent
-	def financial_analyst(self) -> Agent:
-		return Agent(
-			config=self.agents_config['financial_analyst'],
-			tools=[
-				income_stmt,
-				balance_sheet,
-				insider_transactions,
-				cash_flow,
-				option_chain,
-				stock_info
-			],
-			llm=sLLM,
-			step_callback=lambda step: self.step_callback(step, "Financial Analyst")
 		)
 	
 	@agent
@@ -143,6 +164,13 @@ class Assetmanagement():
 		)
   
 	@task
+	def financial_analysis_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['financial_analysis_task'],
+			output_file='reports/financial_report.md',
+		)
+  
+	@task
 	def macro_strategist_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['macro_strategist_task'],
@@ -155,14 +183,7 @@ class Assetmanagement():
 			config=self.tasks_config['technical_analysis_task'],
 			output_file='reports/technical_report.md',
 		)
-
-	@task
-	def financial_analysis_task(self) -> Task:
-		return Task(
-			config=self.tasks_config['financial_analysis_task'],
-			output_file='reports/financial_report.md',
-		)
-
+	
 	@task
 	def investment_recommendation_task(self) -> Task:
 		return Task(

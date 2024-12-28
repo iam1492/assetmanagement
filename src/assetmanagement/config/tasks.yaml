@@ -1,12 +1,35 @@
 research_task:
   description: >
     Gather and analyze the latest news and market sentinment surrounding 
-    {company}'s stock. Use provided tools to get the latest news and market sentiment.
-    Use ScrapeWebsiteTool and SerperDevTool to get the latest news and market sentiment.
+    {company}'s stock. 
+    Search information abount {company} from internet and retrieve recent important information.
+    Use provided tools to get the latest news and market sentiment.
+    Use ScrapeWebsiteTool and SerperDevTool to get the latest information about {company}
   expected_output: >
     Your final answer MUST be a detailed summary of the news and market 
     sentiment surrounding the stock.
   agent: researcher
+
+financial_analysis_task:
+  description: >
+    Analyze the {company}'s financial statements, balance sheet, insider transactions data 
+    and other metrics to evaluate {company}'s financial health and performance.
+    Role of the financial analyst is:
+    - Evaluating {company}'s value through financial statements and other metrics.
+    - Building financial models to forecast future earnings and cash flow.
+    - Conducting risk assessments by analyzing financial data.
+    - Supporting investment and financing decisions.
+    Using option chain data
+    - Confirmation of investment sentiment through put/call ratio analysis.
+    - Measurement of uncertainty through implied volatility.
+    - Estimation of institutional investor position.
+    Using the calulator tools to get the financial metrics and ratios.
+    All the tools only need one ticker parameter which is {company}'s ticker name.
+    Recommended to use all the provided tools to get enough financial data and metrics.
+  expected_output: >
+    Your final answer MUST be a detailed report with a {company}'s revenue, earnings,
+    cash flow, option chain, and other key financial metrics.
+  agent: financial_analyst
 
 macro_strategist_task:
   description: >
@@ -43,40 +66,13 @@ technical_analysis_task:
     price targets and any other relevant information.
   agent: technical_analyst
 
-financial_analysis_task:
-  description: >
-    Analyze the {company}'s financial statements, balance sheet, insider transactions data 
-    and other metrics to evaluate {company}'s financial health and performance.
-    Role of the financial analyst is:
-    - Evaluating {company}'s value through financial statements and other metrics.
-    - Building financial models to forecast future earnings and cash flow.
-    - Conducting risk assessments by analyzing financial data.
-    - Supporting investment and financing decisions.
-    Using option chain data
-    - Confirmation of investment sentiment through put/call ratio analysis.
-    - Measurement of uncertainty through implied volatility.
-    - Estimation of institutional investor position.
-    You MUST use all the following three tools:
-    - When using Income Statement tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
-    - When using Balance Sheet tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
-    - When using Insider Transactions tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
-    - When using Stock Info tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
-    - When using Cash Flow tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
-    - When using Option Chain tool, parameter MUST be one word of {company}'s ticker name, for example, ABNB, ONL, DIS, GRMN, BABA).
-
-  expected_output: >
-    Your final answer MUST be a report with an overview of {company}'s revenue, earnings,
-    cash flow, option chain, and other key financial metrics.
-    And do simple DCF Valuation using provided tools to evaluate the stock price.
-  agent: financial_analyst
-
 investment_recommendation_task:
   description: >
     Based on the research, technical analysis, and financial analysis reports, 
     provide a detailed investment recommendation for {company} stock.
   expected_output: >
     Your final answer MUST be a detailed recommendation to BUY, SELL or HOLD the stock.
-    Provide a clear rationale for your recommendation.
+    Provide a clear and detailed rationale for your recommendation.
     The final answer MUST use markdown format for the best readability but don't wrap the content with ```markdown``` syntax.
   context: [research_task,technical_analysis_task,financial_analysis_task, macro_strategist_task]
   agent: hedge_fund_manager
