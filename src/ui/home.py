@@ -20,18 +20,27 @@ from email.mime.application import MIMEApplication
 import re
 import streamlit_authenticator as stauth
 from pyaml_env import parse_config
+import yaml
 
 load_dotenv()
 
 class StockReportGenUI:
     authenticator = None
     config = None
+    config_path = None
     
     def __init__(self):
+        st.set_page_config(page_title="Ramus", page_icon="👋")
         dir = os.path.dirname(__file__)
-        config_path = os.path.join(dir, "config/authentication.yaml")
-        self.config = parse_config(config_path)
-        self.authenticator = None
+        self.config_path = os.path.join(dir, "config/authentication.yaml")
+        self.config = parse_config(self.config_path)
+        self.authenticator = stauth.Authenticate(
+                self.config['credentials'],
+                self.config['cookie']['name'],
+                self.config['cookie']['key'],
+                self.config['cookie']['expiry_days'],
+                auto_hash=False
+            )
     
     def start_analysing(self, company):
         inputs = {
@@ -72,30 +81,21 @@ class StockReportGenUI:
                 st.session_state.generating = True
 
     def authenticate(self):
-        if self.authenticator == None:
-            self.authenticator = stauth.Authenticate(
-                self.config['credentials'],
-                self.config['cookie']['name'],
-                self.config['cookie']['key'],
-                self.config['cookie']['expiry_days'],
-                auto_hash=False
-            )
-        
         if st.session_state['authentication_status']:
             self.authenticator.logout(location="sidebar")
-            return True
         elif st.session_state['authentication_status'] is False:
             st.error('Username/password is incorrect')
-            return False
         elif st.session_state['authentication_status'] is None:
             self.authenticator.login(location="main")
             st.warning('Please enter your username and password')
-            return False
+        with open(self.config_path, 'w') as file:
+            yaml.dump(self.config, file, default_flow_style=False)
     
     def render(self):
-        st.set_page_config(page_title="Ramus", page_icon="👋")
         
-        if self.authenticate():
+        self.authenticate()
+        
+        if st.session_state['authentication_status']:
             if "company" not in st.session_state:
                 st.session_state.company = ""
                 
