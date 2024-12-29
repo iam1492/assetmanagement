@@ -160,7 +160,7 @@ class StockReportGenUI:
     
     def get_report_path(self, file_name: str):
         root_path = Path(__file__).parent.parent.parent
-        return os.path.join(root_path,f"reports\\{file_name}" )
+        return os.path.join(root_path,f"reports/{file_name}" )
     
 if __name__ == "__main__":
     StockReportGenUI().render()
