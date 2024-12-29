@@ -21,6 +21,7 @@ import re
 import streamlit_authenticator as stauth
 from pyaml_env import parse_config
 import yaml
+from pathlib import Path
 
 load_dotenv()
 
@@ -145,17 +146,21 @@ class StockReportGenUI:
         multipart_msg.attach(part1)
         multipart_msg.attach(part2)
         
-        script_dir = os.path.dirname(__file__)
-        financial_report_path = os.path.join(script_dir, "reports/financial_report.md")
-        with open(financial_report_path, "r", encoding='utf-8') as f:
+        with open(self.get_report_path("macro_report.md"), "r", encoding='utf-8') as f:
+            multipart_msg.attach(MIMEApplication(f.read(), Name="macro_report.md"))
+            
+        with open(self.get_report_path("financial_report.md"), "r", encoding='utf-8') as f:
             multipart_msg.attach(MIMEApplication(f.read(), Name="financial_report.md"))
-
-        technical_report_path = os.path.join(script_dir, "reports/technical_report.md")
-        with open(technical_report_path, "r", encoding='utf-8') as f:
+        
+        with open(self.get_report_path("technical_report.md"), "r", encoding='utf-8') as f:
             multipart_msg.attach(MIMEApplication(f.read(), Name="technical_report.md"))
 
         smtp.sendmail(sender, receiver, multipart_msg.as_string())
         smtp.quit()
+    
+    def get_report_path(self, file_name: str):
+        root_path = Path(__file__).parent.parent.parent
+        return os.path.join(root_path,f"reports\\{file_name}" )
     
 if __name__ == "__main__":
     StockReportGenUI().render()
