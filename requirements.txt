@@ -6,5 +6,4 @@ crewai
 crewai-tools
 streamlit-authenticator
 yfinance
-pysqlite3-binary
 pyaml-env

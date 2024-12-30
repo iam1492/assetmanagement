@@ -40,7 +40,7 @@ class Assetmanagement():
         *args,
     ):	
 		with st.chat_message("AI"):
-			emoji = self.getAgentEmoji(agent_name)
+			emoji = self.get_agent_emoji(agent_name)
 			if isinstance(agent_output, AgentAction):
 				with st.expander(f"{agent_name} Tought"):
 					st.write(f"{emoji} {agent_name}")
@@ -203,7 +203,7 @@ class Assetmanagement():
 		"""Creates the Assetmanagement crew"""
 		# To learn how to add knowledge sources to your crew, check out the documentation:
 		# https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-
+		
 		return Crew(
 			agents=self.agents, # Automatically created by the @agent decorator
 			tasks=self.tasks, # Automatically created by the @task decorator
@@ -212,7 +212,7 @@ class Assetmanagement():
 			# process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
 		)
   
-	def	getAgentEmoji(self, agent_name):
+	def	get_agent_emoji(self, agent_name):
 		emojis = {
 			"Researcher": emoji.SANTA,
 			"Macro Strategist": emoji.ELSA,
