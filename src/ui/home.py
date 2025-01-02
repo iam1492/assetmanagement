@@ -1,11 +1,11 @@
 import streamlit as st
 import sys
-import pathlib
+from pathlib import Path
 import markdown
 import os
 import traceback
 from dotenv import load_dotenv
-sys.path.append(str(pathlib.Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).parent.parent))
 from assetmanagement.crew import Assetmanagement
 from crewai.crew import CrewOutput
 import assetmanagement.emoji as emoji
@@ -17,7 +17,6 @@ import re
 import streamlit_authenticator as stauth
 from pyaml_env import parse_config
 import yaml
-from pathlib import Path
 from google.cloud import firestore
 import json
 
@@ -75,13 +74,15 @@ class StockReportGenUI:
         print(f"##### json_object: {json_object}")
         print(f"##### user name: {st.session_state['username']}")
         print(f"##### ticker: {json_object['ticker']}")
+        
         user_doc = self.db.collection("users").document(st.session_state['username'])
         company_doc = user_doc.collection("companies").document(json_object['ticker'])
         company_doc.set({
                         "company": json_object['company'],
                         "ticker": json_object['ticker'],
                         "rating": json_object['rating'],
-                        "final_result": json_object['final_result']
+                        "final_result": json_object['final_result'],
+                        "created_at":firestore.SERVER_TIMESTAMP
                     })
 
     def is_valid_email(self, email: str):

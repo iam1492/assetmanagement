@@ -95,7 +95,7 @@ intern_task:
     1. company:str - company name which is a string. 
     2. ticker:str - ticker of the company which is a string.
     3. rating:str - rating of the company which is a string. (example: Buy, Sell, Hold)
-    4. final result:str -Full output of the translator.
+    4. final result:str - Full output of the translator. Before passing the output to the tool, you must convert the output to html formatting.
   expected_output: >
     Your final output MUST be a return value of the provided tool.
   context: [translate_task]

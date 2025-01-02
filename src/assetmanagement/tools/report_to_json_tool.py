@@ -7,7 +7,7 @@ class ReportToJsonInput(BaseModel):
     company: str = Field(..., description="company name which is a string.")
     ticker: str = Field(..., description="ticker of the company which is a string.")
     rating: str = Field(..., description="Description of the argumentrating of the company which is a string. (example: Buy, Sell, Hold)")
-    final_result: str = Field(..., description="Full output of the translator")
+    final_result: str = Field(..., description="Full output of the translator. Before passing the output to the tool, you must convert the output to html formatting.")
     
 class ReportToJsonTool(BaseTool):
     name: str = "Report to JSON Converter"

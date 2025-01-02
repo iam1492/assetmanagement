@@ -1,24 +1,33 @@
 cookie:
   expiry_days: 30
-  key: ramus_ssuny_stock # Must be a string
+  key: ramus_ssuny_stock
   name: ramus
 credentials:
   usernames:
     ramus:
-      email: !ENV ${RAMUS_EMAIL}
-      failed_login_attempts: 0 # Will be managed automatically
+      email: iam1492@gmail.com
+      failed_login_attempts: 0
       first_name: Ramus
       last_name: Jung
-      logged_in: False # Will be managed automatically
-      password: !ENV ${RAMUS_PW}
-      roles: # Optional
+      logged_in: true
+      password: $2b$12$A3AN4h1ZS.t61s2ARbD17Oxyl/trjwf1le4rkGYlSruNinBDfZCre
+      roles:
       - admin
+    sadadjr79:
+      email: sadadjr79@naver.com
+      failed_login_attempts: 0
+      first_name: Garam
+      last_name: Jung
+      logged_in: false
+      password: $2b$12$8fyLiBefeQzT9g6Psof9aej0.GgknWwB/eDQplS7XVVbKihGLQVpy
+      roles:
+      - viewer
     sunny:
-      email: !ENV ${SUNNY_EMAIL}
-      failed_login_attempts: 0 # Will be managed automatically
+      email: howtomeetme@gmail.com
+      failed_login_attempts: 0
       first_name: Sunny
       last_name: Park
-      logged_in: False # Will be managed automatically
-      password: !ENV ${SUNNY_PW}
-      roles: # Optional
+      logged_in: false
+      password: $2b$12$eXfx.dLkvHb8KgkkPtK8LOL3zOmKrG2QNKYR6Z8EVcmr7rISPKxN2
+      roles:
       - viewer
