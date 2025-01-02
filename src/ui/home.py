@@ -18,6 +18,8 @@ import streamlit_authenticator as stauth
 from pyaml_env import parse_config
 import yaml
 from pathlib import Path
+from google.cloud import firestore
+import json
 
 load_dotenv()
 
@@ -25,8 +27,15 @@ class StockReportGenUI:
     authenticator = None
     config = None
     config_path = None
+    db = None
     
     def __init__(self):
+        #load database
+        root_path = Path(__file__).parent.parent.parent
+        firestore_key_path = os.path.join(root_path,"firestore-key.json" )
+        self.db = firestore.Client.from_service_account_json(firestore_key_path)
+        
+        #initialize authenticator
         st.set_page_config(page_title="Ramus", page_icon="👋")
         dir = os.path.dirname(__file__)
         self.config_path = os.path.join(dir, "config/authentication.yaml")
@@ -52,12 +61,28 @@ class StockReportGenUI:
             st.session_state.generating = False
             if isinstance(st.session_state.final_report, CrewOutput):
                 try:
-                    self.send_email(st.session_state.final_report.raw, st.session_state.company, st.session_state.email)
+                    final_result = st.session_state.final_report.raw
+                    self.save_to_firestore(final_result)
+                    self.send_email(final_result, st.session_state.company, st.session_state.email)
                     st.session_state.final_report = ""
                 except Exception as e:
                     print(traceback.format_exc())
                     st.error(f"An error occurred: {e}")
                     st.session_state.final_report = ""
+
+    def save_to_firestore(self, final_result):
+        json_object = eval(final_result)
+        print(f"##### json_object: {json_object}")
+        print(f"##### user name: {st.session_state['username']}")
+        print(f"##### ticker: {json_object['ticker']}")
+        user_doc = self.db.collection("users").document(st.session_state['username'])
+        company_doc = user_doc.collection("companies").document(json_object['ticker'])
+        company_doc.set({
+                        "company": json_object['company'],
+                        "ticker": json_object['ticker'],
+                        "rating": json_object['rating'],
+                        "final_result": json_object['final_result']
+                    })
 
     def is_valid_email(self, email: str):
         pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
@@ -122,37 +147,34 @@ class StockReportGenUI:
     def send_email(self, markdown_text: str, company: str, email: str):
         if email and email != "":
             receiver = email
-        else:
-            receiver = os.getenv('EMAIL_RECEIVER')
-
-        sender = os.getenv('GMAIL_SENDER')
-        smtp_server = os.getenv('SMTP_SERVER')
-        smtp = smtplib.SMTP(smtp_server, 587)
-        smtp.starttls()
-        smtp.login(os.getenv('GMAIL_SENDER'), os.getenv('GMAIL_PASSWORD'))
-        
-        multipart_msg = MIMEMultipart("alternative")
-        multipart_msg["Subject"] = f"{company} Stock Analysis Report"
-        multipart_msg["From"] = sender
-        multipart_msg["To"] = receiver
-
-        html = markdown.markdown(markdown_text)
-        part1 = MIMEText(markdown_text, "plain")
-        part2 = MIMEText(html, "html")
-        multipart_msg.attach(part1)
-        multipart_msg.attach(part2)
-        
-        with open(self.get_report_path("macro_report.md"), "r", encoding='utf-8') as f:
-            multipart_msg.attach(MIMEApplication(f.read(), Name="macro_report.md"))
+            sender = os.getenv('GMAIL_SENDER')
+            smtp_server = os.getenv('SMTP_SERVER')
+            smtp = smtplib.SMTP(smtp_server, 587)
+            smtp.starttls()
+            smtp.login(os.getenv('GMAIL_SENDER'), os.getenv('GMAIL_PASSWORD'))
             
-        with open(self.get_report_path("financial_report.md"), "r", encoding='utf-8') as f:
-            multipart_msg.attach(MIMEApplication(f.read(), Name="financial_report.md"))
-        
-        with open(self.get_report_path("technical_report.md"), "r", encoding='utf-8') as f:
-            multipart_msg.attach(MIMEApplication(f.read(), Name="technical_report.md"))
+            multipart_msg = MIMEMultipart("alternative")
+            multipart_msg["Subject"] = f"{company} Stock Analysis Report"
+            multipart_msg["From"] = sender
+            multipart_msg["To"] = receiver
 
-        smtp.sendmail(sender, receiver, multipart_msg.as_string())
-        smtp.quit()
+            html = markdown.markdown(markdown_text)
+            part1 = MIMEText(markdown_text, "plain")
+            part2 = MIMEText(html, "html")
+            multipart_msg.attach(part1)
+            multipart_msg.attach(part2)
+            
+            with open(self.get_report_path("macro_report.md"), "r", encoding='utf-8') as f:
+                multipart_msg.attach(MIMEApplication(f.read(), Name="macro_report.md"))
+                
+            with open(self.get_report_path("financial_report.md"), "r", encoding='utf-8') as f:
+                multipart_msg.attach(MIMEApplication(f.read(), Name="financial_report.md"))
+            
+            with open(self.get_report_path("technical_report.md"), "r", encoding='utf-8') as f:
+                multipart_msg.attach(MIMEApplication(f.read(), Name="technical_report.md"))
+
+            smtp.sendmail(sender, receiver, multipart_msg.as_string())
+            smtp.quit()
     
     def get_report_path(self, file_name: str):
         root_path = Path(__file__).parent.parent.parent

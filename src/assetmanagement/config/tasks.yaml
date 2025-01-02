@@ -71,7 +71,8 @@ investment_recommendation_task:
     Based on the research, technical analysis, and financial analysis reports, 
     provide a detailed investment recommendation for {company} stock.
   expected_output: >
-    Your final answer MUST be a detailed recommendation to BUY, SELL or HOLD the stock.
+    Your final report MUST be a detailed recommendation to BUY, SELL or HOLD the stock.
+    So final report MUST constain one of the RATING words, BUY, SELL or HOLD.
     Provide a clear and detailed rationale for your recommendation.
     The final answer MUST use markdown format for the best readability but don't wrap the content with ```markdown``` syntax.
   context: [research_task,technical_analysis_task,financial_analysis_task, macro_strategist_task]
@@ -80,7 +81,22 @@ investment_recommendation_task:
 translate_task:
   description: >
     Translate final report of hedge fund manager into korean language.
+    But must not translate only the words, BUY, SELL, HOLD, leave them as English.
   expected_output: >
     Your final answer MUST be a translated version of the hedge fund manager's report in Korean.
   context: [investment_recommendation_task]
   agent: translator
+
+intern_task:
+  description: >
+    Convert translated output to JSON object string using provided tool.
+    You must pass the correct parameters to the provided tool - Report to JSON Converter
+    Read the report carefully and pass the following parameters to the tool correctly.
+    1. company:str - company name which is a string. 
+    2. ticker:str - ticker of the company which is a string.
+    3. rating:str - rating of the company which is a string. (example: Buy, Sell, Hold)
+    4. final result:str -Full output of the translator.
+  expected_output: >
+    Your final output MUST be a return value of the provided tool.
+  context: [translate_task]
+  agent: intern

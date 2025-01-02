@@ -7,6 +7,7 @@ import streamlit as st
 from typing import Union, List, Tuple, Dict
 import os
 import assetmanagement.emoji as emoji
+from assetmanagement.tools.report_to_json_tool import ReportToJsonTool
 
 # If you want to run a snippet of code before or after the crew starts, 
 # you can use the @before_kickoff and @after_kickoff decorators
@@ -54,9 +55,9 @@ class Assetmanagement():
     
 			elif isinstance(agent_output, AgentFinish):
 				st.write(f"{emoji} {agent_name}")
-				if agent_output.thought:
+				if agent_output.thought and agent_name != "Intern":
 					st.write(agent_output.thought)
-				if agent_output.output:
+				if agent_output.output and agent_name != "Intern":
 					st.write(agent_output.output)
 			else:
 				st.write(type(agent_output))
@@ -153,6 +154,17 @@ class Assetmanagement():
 			step_callback=lambda step: self.step_callback(step, "Translator")
 		)
   
+	@agent
+	def intern(self) -> Agent:
+		return Agent(
+			config=self.agents_config['intern'],
+			llm=sLLM,
+			tools=[
+				ReportToJsonTool(result_as_answer=True),
+			],
+			step_callback=lambda step: self.step_callback(step, "Intern")
+		)
+  
 	# To learn more about structured task outputs, 
 	# task dependencies, and task callbacks, check out the documentation:
 	# https://docs.crewai.com/concepts/tasks#overview-of-a-task
@@ -197,7 +209,13 @@ class Assetmanagement():
 			config=self.tasks_config['translate_task'],
 			output_file='reports/investment_recommendation_kr.md',
 		)
-
+  
+	@task
+	def intern_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['intern_task']
+		)
+  
 	@crew
 	def crew(self) -> Crew:
 		"""Creates the Assetmanagement crew"""
