@@ -13,8 +13,8 @@ credentials:
       password: $2b$12$A3AN4h1ZS.t61s2ARbD17Oxyl/trjwf1le4rkGYlSruNinBDfZCre
       roles:
       - admin
-    sadadjr79:
-      email: sadadjr79@naver.com
+    sadadjr:
+      email: sadadjr@naver.com
       failed_login_attempts: 0
       first_name: Garam
       last_name: Jung
