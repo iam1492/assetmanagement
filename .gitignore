@@ -24,3 +24,4 @@ crew_tasks_output.json
 Dockerfile
 reports/*
 firestore-key.json
+prompt_to_remember.txt

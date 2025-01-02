@@ -62,7 +62,7 @@ class StockReportGenUI:
                 try:
                     final_result = st.session_state.final_report.raw
                     self.save_to_firestore(final_result)
-                    self.send_email(final_result, st.session_state.company)
+                    self.send_email()
                     st.session_state.final_report = ""
                 except Exception as e:
                     print(traceback.format_exc())
@@ -140,8 +140,16 @@ class StockReportGenUI:
             self.sidebar();
             self.report_generation();
 
-    def send_email(self, markdown_text: str, company: str):
-        if st.session_state.send_email:
+    def send_email(self):
+        
+        markdown_text = None
+        
+        with open(self.get_report_path("investment_recommendation_kr.md"), "r", encoding='utf-8') as f:
+            markdown_text = f.read()
+            
+        print(f"##### markdown_text: {markdown_text}")
+        
+        if st.session_state.send_email and markdown_text:
             receiver = st.session_state['email']
             sender = os.getenv('GMAIL_SENDER')
             smtp_server = os.getenv('SMTP_SERVER')
@@ -150,7 +158,7 @@ class StockReportGenUI:
             smtp.login(os.getenv('GMAIL_SENDER'), os.getenv('GMAIL_PASSWORD'))
             
             multipart_msg = MIMEMultipart("alternative")
-            multipart_msg["Subject"] = f"{company} Stock Analysis Report"
+            multipart_msg["Subject"] = f"{st.session_state.company} Stock Analysis Report"
             multipart_msg["From"] = sender
             multipart_msg["To"] = receiver
 
