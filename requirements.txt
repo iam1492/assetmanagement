@@ -8,3 +8,4 @@ streamlit-authenticator
 yfinance
 pyaml-env
 google-cloud-firestore
+itables
