@@ -24,16 +24,23 @@ class MyRecord():
     
     def render(self):
         st.markdown("# My Records")
-        self.stock_records = self.get_records()
-        
-        df = pd.DataFrame(self.stock_records)[['company', 'ticker', 'rating', 'created_at']]
-        table = interactive_table(df, select=True, column_filter=True, column_sort=True, column_width=200)
-        st.markdown("### Select a row to view the final result")
-        
-        if table and table['selected_rows']:
-            st.write("\n")
-            final_result = self.stock_records[table['selected_rows'][0]].get('final_result')
-            st.html(final_result)
+        if st.session_state['authentication_status']:
+            self.stock_records = self.get_records()
+            
+            if self.stock_records.__len__() == 0:
+                st.warning("There is no record to show")
+                return
+            
+            df = pd.DataFrame(self.stock_records)[['company', 'ticker', 'rating', 'created_at']]
+            table = interactive_table(df, select=True, column_filter=True, column_sort=True, column_width=200)
+            st.markdown("### Select a row to view the final result")
+            
+            if table and table['selected_rows']:
+                st.write("\n")
+                final_result = self.stock_records[table['selected_rows'][0]].get('final_result')
+                st.html(final_result)
+        else:
+            st.error("Please login to view your records")
         
 if __name__ == "__main__":
     MyRecord().render()

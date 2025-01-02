@@ -62,7 +62,7 @@ class StockReportGenUI:
                 try:
                     final_result = st.session_state.final_report.raw
                     self.save_to_firestore(final_result)
-                    self.send_email(final_result, st.session_state.company, st.session_state.email)
+                    self.send_email(final_result, st.session_state.company)
                     st.session_state.final_report = ""
                 except Exception as e:
                     print(traceback.format_exc())
@@ -93,14 +93,9 @@ class StockReportGenUI:
         with st.sidebar:
             st.markdown("## Menu")
             st.text_input("Enter name of company", key='company', placeholder="Apple, Adobe, etc")
-            email = st.text_input("Enter email for the final Report", key='email', placeholder="abc@def.com")
-
-            if (not email):
-                disabled = False
-            else:
-                disabled = not self.is_valid_email(email)
+            st.checkbox("Send final report to my email", key='send_email')
             
-            if st.button("Start Analysis", disabled=disabled):
+            if st.button("Start Analysis"):
                 st.session_state.generating = True
 
     def authenticate(self):
@@ -145,9 +140,9 @@ class StockReportGenUI:
             self.sidebar();
             self.report_generation();
 
-    def send_email(self, markdown_text: str, company: str, email: str):
-        if email and email != "":
-            receiver = email
+    def send_email(self, markdown_text: str, company: str):
+        if st.session_state.send_email:
+            receiver = st.session_state['email']
             sender = os.getenv('GMAIL_SENDER')
             smtp_server = os.getenv('SMTP_SERVER')
             smtp = smtplib.SMTP(smtp_server, 587)
