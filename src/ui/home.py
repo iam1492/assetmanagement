@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 sys.path.append(str(Path(__file__).parent.parent))
 from assetmanagement.crew import Assetmanagement
 from crewai.crew import CrewOutput
-import assetmanagement.emoji as emoji
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -35,15 +34,6 @@ class StockReportGenUI:
         self.db = firestore.Client.from_service_account_json(firestore_key_path)
         
         dir = os.path.dirname(__file__)
-        self.config_path = os.path.join(dir, "config/authentication.yaml")
-        self.config = parse_config(self.config_path)
-        self.authenticator = stauth.Authenticate(
-                self.config['credentials'],
-                self.config['cookie']['name'],
-                self.config['cookie']['key'],
-                self.config['cookie']['expiry_days'],
-                auto_hash=False
-            )
     
     def start_analysing(self, company):
         inputs = {
@@ -83,33 +73,17 @@ class StockReportGenUI:
         pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         return re.match(pattern, email) is not None
 
-    def sidebar(self):
-        
-        with st.sidebar:
+    def render(self):
+        logged_in = st.session_state['authentication_status']    
+    
+        if logged_in == True:
+            
+            st.subheader("Stock Analysis", divider="gray")
             st.text_input("Enter name of company", key='company', placeholder="Apple, Adobe, etc")
             st.checkbox("Send final report to my email", key='send_email')
-            
             if st.button("Start Analysis"):
                 st.session_state.generating = True
             
-            add_vertical_space(10)
-            if st.session_state['authentication_status']:
-                self.authenticator.logout(location="sidebar")
-
-    def authenticate(self):
-        if st.session_state['authentication_status'] is False:
-            st.error('Username/password is incorrect')
-        elif st.session_state['authentication_status'] is None:
-            self.authenticator.login(location="main")
-            st.warning('Please enter your username and password')
-        with open(self.config_path, 'w') as file:
-            yaml.dump(self.config, file, default_flow_style=False)
-    
-    def render(self):
-        
-        self.authenticate()
-        
-        if st.session_state['authentication_status']:
             if "company" not in st.session_state:
                 st.session_state.company = ""
                 
@@ -118,24 +92,7 @@ class StockReportGenUI:
                 
             if "generating" not in st.session_state:
                 st.session_state.generating = ""
-            
-            st.subheader("Ramus Stock Analysis", divider="gray")
-            st.write(f"Welcome :blue[{st.session_state['username']}] :sunglasses:")
-            st.markdown(
-                f"""    
-                ### Members
-                ### {emoji.RAMUS} CEO - Ramus Jung
-                ### {emoji.SUNNY} CSO - Sunny Park
-                * {emoji.SANTA} Research Head - Santa Claus
-                * {emoji.RUDOLF} Technical Analyst - Rudolf
-                * {emoji.SNOWMAN} Financial Analyst - Snowman
-                * {emoji.ELSA} Macro Analyst - Elsa
-                * {emoji.PENGSU} Translator - Pengsu
-                * {emoji.KEVIN} Hedge Fund Manager - Kevin
-                """
-            )
-            
-            self.sidebar();
+        
             self.report_generation();
 
     def send_email(self):
