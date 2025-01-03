@@ -18,7 +18,7 @@ import streamlit_authenticator as stauth
 from pyaml_env import parse_config
 import yaml
 from google.cloud import firestore
-import json
+from streamlit_extras.add_vertical_space import add_vertical_space
 
 load_dotenv()
 
@@ -34,8 +34,6 @@ class StockReportGenUI:
         firestore_key_path = os.path.join(root_path,"firestore-key.json" )
         self.db = firestore.Client.from_service_account_json(firestore_key_path)
         
-        #initialize authenticator
-        st.set_page_config(page_title="Ramus", page_icon="👋")
         dir = os.path.dirname(__file__)
         self.config_path = os.path.join(dir, "config/authentication.yaml")
         self.config = parse_config(self.config_path)
@@ -68,13 +66,9 @@ class StockReportGenUI:
                     print(traceback.format_exc())
                     st.error(f"An error occurred: {e}")
                     st.session_state.final_report = ""
-
+    
     def save_to_firestore(self, final_result):
         json_object = eval(final_result)
-        print(f"##### json_object: {json_object}")
-        print(f"##### user name: {st.session_state['username']}")
-        print(f"##### ticker: {json_object['ticker']}")
-        
         user_doc = self.db.collection("users").document(st.session_state['username'])
         company_doc = user_doc.collection("companies").document(json_object['ticker'])
         company_doc.set({
@@ -90,18 +84,20 @@ class StockReportGenUI:
         return re.match(pattern, email) is not None
 
     def sidebar(self):
+        
         with st.sidebar:
-            st.markdown("## Menu")
             st.text_input("Enter name of company", key='company', placeholder="Apple, Adobe, etc")
             st.checkbox("Send final report to my email", key='send_email')
             
             if st.button("Start Analysis"):
                 st.session_state.generating = True
+            
+            add_vertical_space(10)
+            if st.session_state['authentication_status']:
+                self.authenticator.logout(location="sidebar")
 
     def authenticate(self):
-        if st.session_state['authentication_status']:
-            self.authenticator.logout(location="sidebar")
-        elif st.session_state['authentication_status'] is False:
+        if st.session_state['authentication_status'] is False:
             st.error('Username/password is incorrect')
         elif st.session_state['authentication_status'] is None:
             self.authenticator.login(location="main")
@@ -122,10 +118,12 @@ class StockReportGenUI:
                 
             if "generating" not in st.session_state:
                 st.session_state.generating = ""
-            st.write("# Welcome to Ramus Corp")
+            
+            st.subheader("Ramus Stock Analysis", divider="gray")
+            st.write(f"Welcome :blue[{st.session_state['username']}] :sunglasses:")
             st.markdown(
-                f"""
-                ## Members
+                f"""    
+                ### Members
                 ### {emoji.RAMUS} CEO - Ramus Jung
                 ### {emoji.SUNNY} CSO - Sunny Park
                 * {emoji.SANTA} Research Head - Santa Claus
@@ -184,5 +182,4 @@ class StockReportGenUI:
         root_path = Path(__file__).parent.parent.parent
         return os.path.join(root_path,f"reports/{file_name}" )
     
-if __name__ == "__main__":
-    StockReportGenUI().render()
+StockReportGenUI().render()

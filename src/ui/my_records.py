@@ -11,7 +11,7 @@ class MyRecord():
     stock_records = []
     
     def __init__(self):
-        root_path = Path(__file__).parent.parent.parent.parent
+        root_path = Path(__file__).parent.parent.parent
         firestore_key_path = os.path.join(root_path,"firestore-key.json" )
         self.db = firestore.Client.from_service_account_json(firestore_key_path)
         
@@ -23,7 +23,7 @@ class MyRecord():
         return records
     
     def render(self):
-        st.markdown("# My Records")
+        st.subheader("Stock Records", divider="gray")
         if st.session_state['authentication_status']:
             self.stock_records = self.get_records()
             
@@ -41,6 +41,5 @@ class MyRecord():
                 st.html(final_result)
         else:
             st.error("Please login to view your records")
-        
-if __name__ == "__main__":
-    MyRecord().render()
+
+MyRecord().render()

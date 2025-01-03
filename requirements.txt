@@ -9,3 +9,4 @@ yfinance
 pyaml-env
 google-cloud-firestore
 itables
+streamlit-extras
